@@ -1,0 +1,63 @@
+一、问题来源 ： LeetCode287. Find the Duplicate Number
+
+二、解决问题 ：含环链表中环入口结点的寻找问题
+
+三、算法介绍
+
+1、传统方法：用HashSet来解决
+
+假设ListNode类已定义，则按序存入Set后第一个重复的结点即为环入口
+
+public ListNode EntryNodeOfLoop(ListNode pHead){
+    HashSet<ListNode> hs = new HashSet<ListNode>();
+        while(pHead!=null){
+            if(!hs.add(pHead))//如果包含了，那么这个就是入口结点
+                 return pHead;
+            pHead = pHead.next;
+         }
+        return null;
+ }
+ 
+ 如果采用这种方法，必须完整得完成一次环结点的遍历；
+ 
+ 2、Floyd算法（弗洛伊德的乌龟和兔子问题）
+ 
+ 【1】算法介绍
+ 
+ 这里的思路本质上是快慢指针，hare（兔指针，代表快结点）每次走2步，tortoise（龟指针，代表慢节点）每次走一步，令x是出发点到环的起点的距离，y是环的长度，可以证明，乌龟最多走x+y步，兔子最多2（x+y）步。证明如下：
+ 
+ 假设乌龟已经进入环中并已经移动了y1步，则此时兔子已经移动了2*(x+y1)步，如果要两者相遇，则需要步数相差一个环的长度，即x+y1 = y...(1)，由此可以得出，y1 <= y，当仅当x == 0时等号成立。
+ 
+ 但是到目前为止，只是能够判断链表中是否有环，相遇的位置只能判断是在环内而大概率不是环的起点，如果需要找到环的起点还得继续计算。
+ 
+ 我们可以从（1）式得到y1 = y-x,所以环还剩x步需要走，故将hare移动到起始点，双指针均每次走一步，x步后两个指针将在环的起始点相遇。
+ 
+ 【2】算法比较
+ 
+ 相较于使用HashSet，Floyd算法减少了额外空间的使用(o(n) -> o(1))，但是同时没有增加时间复杂度（从tortoise的移动可以看出，Floyd算法依旧完整的走完了x+y）。
+
+ 所以如果只需要判断是否存在环，Floyd方法更有优势。
+ 
+ 
+ 3、Brent算法
+ 
+ Brent算法实际上是对Floyd算法的判断是否存在环的环节进行了优化。对于第i轮移动（轮数从0开始计算），乌龟每次移动i步，兔子每次移动2^i步。可以证明乌龟在环内还是最多走一圈。证明如下：
+ 
+ 在n轮结束时，兔子共走了2^0+2^1+...+2^(n-1) = 2^n-1步，而第n+1轮兔子需要走2^n步，所以兔子每一步需要走出（之前的总步数+1）步。设n轮时乌龟在环内且位于y1的位置，即乌龟移动的距离为x+y1，则下一步兔子将一共走出(x+y1)+(x+y1)+1 = 2*(x+y1)+1的距离，当两者相遇时，有乌龟位于y2位置，此时有：
+
+x + y2 = 2*(x + y2) + 1 = x + y2 + t*y...(2), 即t*y = x + y2 + 1。
+ 
+ 【2】算法比较
+ 
+ 相较于Floyd算法，时间优化接近30%
+ 
+
+四、参考来源
+
+1、Title：一个链表中包含环，请找出该链表的环的入口结点  Website：https://www.cnblogs.com/fankongkong/p/7007869.html
+
+2、Title：弗洛伊德的乌龟和兔子--leecode刷题  Website：https://blog.csdn.net/cirol1997/article/details/103453514
+
+3、Title：brent算法为什么比floyd算法快 Website：https://blog.csdn.net/qq_35688140/article/details/86586035
+
+4、Title：Brent判圈算法学习 Website：http://zhengyhn.github.io/post/algorithm/brent.loop/
